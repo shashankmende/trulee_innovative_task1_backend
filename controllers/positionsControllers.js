@@ -42,7 +42,7 @@ const getPositions = async(req,res)=>{
         res.status(200).send({
             message:"Retrieved positions",
             success:true,
-            positions
+            positions:positions
         })
     } catch (error) {
         console.log(error);

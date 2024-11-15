@@ -33,10 +33,7 @@ const positionsSchema = new mongoose.Schema({
     },
     rounds: {
         type: [
-            {
-                name: { type: String, required: true, trim: true },
-                // description: { type: String, required: true, trim: true }
-            }
+            String
         ],
         
     }
