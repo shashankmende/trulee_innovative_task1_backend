@@ -37,7 +37,7 @@ const positionsSchema = new mongoose.Schema({
         ],
         
     }
-});
+},{timestamps:true});
 
 const PositionModel = mongoose.model("positions", positionsSchema);
 
