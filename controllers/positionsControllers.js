@@ -1,4 +1,5 @@
 const PositionModel = require("../models/positions")
+const SkillsModel = require('../models/skills')
 
 const addPosition = async(req,res)=>{
 
@@ -20,7 +21,7 @@ const addPosition = async(req,res)=>{
         res.status(201).send({
             success:true,
             message:"Position Added",
-            postion:positionInstance
+            position:positionInstance
         })
 
     } catch (error) {
@@ -38,6 +39,7 @@ const addPosition = async(req,res)=>{
 
 const getPositions = async(req,res)=>{
     try {
+        // const positions = await PositionModel.find().populate('skills')
         const positions = await PositionModel.find()
         res.status(200).send({
             message:"Retrieved positions",
@@ -54,4 +56,50 @@ const getPositions = async(req,res)=>{
     }
 }
 
-module.exports = {addPosition,getPositions}
+const getPositionById = async(req,res)=>{
+    try {
+        const {id}=req.params
+        const position = await PositionModel.findOne({_id:id})
+
+        return res.status(200).send({
+            success:true,
+            message:"Position Retrieved successfully",
+            position
+        })
+        
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send({
+            success:false,
+            message:"Error in retrieving position",
+            error
+        })
+    }
+}
+
+const updatePositionById = async(req,res)=>{
+    try {
+        const {id}=req.params
+        console.log('update id',id)
+        const {title,company,experience,skills,jobDescription,rounds,additionalNotes}=req.body 
+        const position = await PositionModel.findByIdAndUpdate({_id:id},{
+            title,company,experience,jobDescription,skills,rounds,additionalNotes
+        })
+        console.log('position updated')
+        return res.status(200).send({
+            success:true,
+            message:"Position updated",
+            position
+        })
+    } catch (error) {
+        console.log('Error in updating')
+        return res.status(500).send({
+            success:false,
+            message:"Failed to update Position",
+            error
+        })
+        
+    }
+}
+
+module.exports = {addPosition,getPositions,getPositionById,updatePositionById}

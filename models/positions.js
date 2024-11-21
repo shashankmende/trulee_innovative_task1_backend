@@ -23,10 +23,16 @@ const positionsSchema = new mongoose.Schema({
         },
         required: true
     },
-    skills: {
-        type: [String],
+    skills: [{
+
+        type: mongoose.Schema.Types.ObjectId,
+        ref:'skills',
         required: true
-    },
+    }],
+    skills:[{
+        type:String,
+        required:true,
+    }],
     additionalNotes: {
         type: String,
         
