@@ -1,8 +1,11 @@
 
 const express = require('express')
-const { addPosition, getPositions, getPositionById, updatePositionById } = require('../controllers/positionsControllers')
-const { addSkills, getSkills } = require('../controllers/skillsMasterController')
-const { addTechnology, getTechnologyWithSkills, getAllTechs } = require('../controllers/technologiesController')
+const { addPosition, getPositions, getPositionById, updatePositionById } = require('../controllers/position')
+const { addSkills, getSkills } = require('../controllers/skillsMaster')
+const { addTechnology, getTechnologyWithSkills, getAllTechs } = require('../controllers/technologyMaster')
+const { addEducationItem, getEducation } = require('../controllers/education')
+const { addCollege, getColleges } = require('../controllers/college')
+const { addCandidate, getCandidate } = require('../controllers/candidate')
 
 const router = express.Router()
 
@@ -31,4 +34,22 @@ router.get('/get-tech/:id',getTechnologyWithSkills)
 
 router.get('/tech',getAllTechs)
 
+
+//education routes
+
+router.post('/education',addEducationItem)
+
+router.get('/education',getEducation)
+
+
+//college routes
+router.post('/college',addCollege)
+
+router.get('/college',getColleges)
+
 module.exports = router
+
+//candidate routes
+router.post('/candidate',addCandidate)
+
+router.get('/candidate',getCandidate)
