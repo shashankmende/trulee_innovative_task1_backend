@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 const CandidateSchema = new mongoose.Schema({
   firstName: {
     type: String,
-    
     trim: true
   },
   lastName: {
@@ -61,9 +60,8 @@ const CandidateSchema = new mongoose.Schema({
       message: "Skills array should contain at least one skill."
     }
   },
-  image:{
-    type:String,
-    required:false
+  photo:{
+    data:Buffer,
   }
 });
 

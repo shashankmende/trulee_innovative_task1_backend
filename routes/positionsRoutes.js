@@ -1,17 +1,14 @@
 
 const express = require('express')
+const formidable = require('formidable')
 const { addPosition, getPositions, getPositionById, updatePositionById } = require('../controllers/position')
 const { addSkills, getSkills } = require('../controllers/skillsMaster')
 const { addTechnology, getTechnologyWithSkills, getAllTechs } = require('../controllers/technologyMaster')
 const { addEducationItem, getEducation } = require('../controllers/education')
 const { addCollege, getColleges } = require('../controllers/college')
-const { addCandidate, getCandidate } = require('../controllers/candidate')
+const { addCandidate, getCandidate, getCandidateBasedOnPosition, getCandidateBasedOnId, updateCandidateById } = require('../controllers/candidate')
 
 const router = express.Router()
-
-router.get("/",(req,res)=>{
-    res.send("Hello world")
-})
 
 
 router.post('/position',addPosition)
@@ -51,5 +48,12 @@ module.exports = router
 
 //candidate routes
 router.post('/candidate',addCandidate)
+// router.post('/candidate',formidable(),addCandidate)
 
 router.get('/candidate',getCandidate)
+
+router.get('/candidate/:title',getCandidateBasedOnPosition)
+
+router.get('/candidate/id/:id',getCandidateBasedOnId)
+
+router.put('/candidate/update/:id',updateCandidateById)
