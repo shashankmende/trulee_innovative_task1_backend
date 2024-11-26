@@ -1,5 +1,6 @@
 const PositionModel = require("../models/positions");
 
+
 const addPosition = async (req, res) => {
   try {
     const {
@@ -117,9 +118,30 @@ const updatePositionById = async (req, res) => {
   }
 };
 
+const getPositionsBasedOnPositionId = async(req,res)=>{
+  try {
+      const {id}=req.params 
+      const positions = await PositionModel.find({_id:id})
+      return res.status(200).send({
+          success:true,
+          message:"Successfully retrieved candidates based on position id",
+          positions
+      })
+  } catch (error) {
+      console.log(error)
+      return res.status(500).send({
+          success:false,
+          message:"Failed to get candidate based on position id",
+          error:error.message
+      })
+  }
+}
+
+
 module.exports = {
   addPosition,
   getPositions,
   getPositionById,
   updatePositionById,
+  getPositionsBasedOnPositionId
 };

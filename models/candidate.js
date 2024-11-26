@@ -4,7 +4,9 @@ const mongoose = require('mongoose');
 const CandidateSchema = new mongoose.Schema({
   firstName: {
     type: String,
-    trim: true
+    trim: true,
+    required:true,
+    unique:true
   },
   lastName: {
     type: String,
@@ -50,6 +52,10 @@ const CandidateSchema = new mongoose.Schema({
     type:String,
     required:true 
   },
+  positionId:{
+    type:String,
+    required:true,
+  },
   skills: {
     type: [String],
     required: true,
@@ -61,7 +67,7 @@ const CandidateSchema = new mongoose.Schema({
     }
   },
   photo:{
-    data:Buffer,
+    type:String,
   }
 });
 
