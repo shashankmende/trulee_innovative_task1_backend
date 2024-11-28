@@ -47,4 +47,52 @@ const getTicket = async(req,res)=>{
     }
 }
 
-module.exports = {createTicket,getTicket}
+
+const getTicketBasedonId  =async(req,res)=>{
+    try {
+        const {id}=req.params 
+        if (!id){
+            return res.status(400).send({message:"ticket id is required"})
+        }
+        const ticket = await Ticket.findById({_id:id})
+        return res.status(200).send({
+            message:"Ticket retrieved successfully",
+            ticket,
+            ticket
+        })
+        
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send({
+            message:"Failed to get ticket based on id",
+            success:false,
+            error
+        })
+    }
+}
+
+const updateTicketById = async(req,res)=>{
+    try {
+        const {id}=req.params
+        const {issueType,description}=req.body
+        const ticket = await Ticket.findByIdAndUpdate({_id:id},{
+            issueType,description
+        })
+
+        return res.status(200).send({
+            success:true,
+            message:"Ticket updated successfully",
+            ticket
+        })
+        
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send({
+            message:"Failed to updated ticket based on id",
+            error,
+            success:false
+        })
+    }
+}
+
+module.exports = {createTicket,getTicket,getTicketBasedonId,updateTicketById}
