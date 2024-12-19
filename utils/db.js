@@ -12,4 +12,6 @@ const ConnectDb =async()=>{
     }
 }
 
-module.exports  =ConnectDb
+module.exports  = ConnectDb
+
+// mongodb+srv://smb:smb123@candidatetable.wewzvjo.mongodb.net/testdb?retryWrites=true&w=majority&appName=CandidateTable
