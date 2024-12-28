@@ -3,8 +3,8 @@ const FeedbackModel = require('../models/feedback')
 
 const createFeedback =async(req,res)=>{
     try {
-        const {Candidate,Questions,Skills,OverallImpression}= req.body
-        const FeedbackInstance = await FeedbackModel({Candidate,Questions,Skills,OverallImpression})
+        const {tenantId,interviewId,candidateId,candidate,interviewerId,questionFeedback,generalComments,skills,overallImpression}= req.body
+        const FeedbackInstance = await FeedbackModel({tenantId,interviewId,candidateId,candidate,interviewerId,questionFeedback,generalComments,skills,overallImpression})
         console.log('response',FeedbackInstance)
         await FeedbackInstance.save()
 
@@ -14,6 +14,11 @@ const createFeedback =async(req,res)=>{
         })
     } catch (error) {
         console.log(error)
+        return res.status(500).send({
+            message:"Failed to add Feedback",
+            success:false,
+            error:error.message,
+        })
     }
 }
 
