@@ -1,4 +1,4 @@
-const skillsMaster = require("../models/skillsMaster")
+const skillsMaster = require("../models/skills")
 
 
 const addSkills = async(req,res)=>{

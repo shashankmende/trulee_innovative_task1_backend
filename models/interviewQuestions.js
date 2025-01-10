@@ -10,4 +10,4 @@ const interviewQuestionSchema = new mongoose.Schema({
     addedBy:{type:String,enum:["scheduler","interviewer"],required:true}, //Role who added the question
 },{timestamps:true})
 
-module.exports = mongoose.model("InterviewQuestions",interviewQuestionSchema)
+module.exports = mongoose.model("InterviewQuestions",interviewQuestionSchema) 

@@ -1,4 +1,4 @@
-const HigherEducationMaster = require("../models/HigherEducationMaster")
+const HigherEducationMaster = require("../models/higherqualification")
 
 
 const addEducationItem = async(req,res)=>{

@@ -1,4 +1,4 @@
-const PositionModel = require("../models/positions");
+const {Position} = require("../models/position");
 
 
 const addPosition = async (req, res) => {
@@ -13,7 +13,7 @@ const addPosition = async (req, res) => {
       rounds,
     } = req.body;
     console.log(req.body);
-    const positionInstance = await PositionModel({
+    const positionInstance = await Position({
       title,
       company,
       jobDescription,
@@ -40,8 +40,8 @@ const addPosition = async (req, res) => {
 
 const getPositions = async (req, res) => {
   try {
-    // const positions = await PositionModel.find().populate('skills')
-    const positions = await PositionModel.find();
+    // const positions = await Position.find().populate('skills')
+    const positions = await Position.find();
     res.status(200).send({
       message: "Retrieved positions",
       success: true,
@@ -60,7 +60,7 @@ const getPositions = async (req, res) => {
 const getPositionById = async (req, res) => {
   try {
     const { id } = req.params;
-    const position = await PositionModel.findOne({ _id: id });
+    const position = await Position.findOne({ _id: id });
 
     return res.status(200).send({
       success: true,
@@ -90,7 +90,7 @@ const updatePositionById = async (req, res) => {
       rounds,
       additionalNotes,
     } = req.body;
-    const position = await PositionModel.findByIdAndUpdate(
+    const position = await Position.findByIdAndUpdate(
       { _id: id },
       {
         title,
@@ -121,7 +121,7 @@ const updatePositionById = async (req, res) => {
 const getPositionsBasedOnPositionId = async(req,res)=>{
   try {
       const {id}=req.params 
-      const positions = await PositionModel.find({_id:id})
+      const positions = await Position.find({_id:id})
       return res.status(200).send({
           success:true,
           message:"Successfully retrieved candidates based on position id",

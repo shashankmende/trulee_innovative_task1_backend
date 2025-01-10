@@ -1,5 +1,5 @@
-const skillsMaster = require("../models/skillsMaster");
-const technologiesMaster = require("../models/technologiesMaster");
+const skillsMaster = require("../models/skills");
+const technologiesMaster = require("../models/TechnologyMaster");
 
 const addTechnology = async(req,res)=>{
     try {

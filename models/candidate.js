@@ -1,75 +1,73 @@
-
 const mongoose = require('mongoose');
 
-const CandidateSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    trim: true,
-    required:true,
-    unique:true
-  },
-  lastName: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  dateOfBirth:{
-    type:Date,
-    required:true
-
-  },
-  phone: {
-    type: String,
-    required: true,
-    match: [/^\d{10}$/, 'Please fill a valid 10-digit phone number']
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    match: [/^\S+@\S+\.\S+$/, 'Please fill a valid email address']
-  },
-  gender: {
-    type: String,
-    enum: ["Male", "Female", "Other"],
-    required: true
-  },
-  higherQualification:{
-    type:String,
-    required:true,
-  },
-  college:{
-    type:String,
-    required:true,
-
-  },
-  experience: {
-    type: Number,
-    required: true,
-    min: 0 
-  },
-  position:{
-    type:String,
-    required:true 
-  },
-  positionId:{
-    type:String,
-    required:true,
-  },
-  skills: {
-    type: [String],
-    required: true,
-    validate: {
-      validator: function(array) {
-        return array.length > 0;
-      },
-      message: "Skills array should contain at least one skill."
-    }
-  },
-  photo:{
-    type:String,
-  }
+const candidateSchema = new mongoose.Schema({
+    FirstName: String,
+    LastName: String,
+    Email: String,
+    Phone: String,
+    Date_Of_Birth: Date,
+    Gender: String,
+    HigherQualification: String,
+    UniversityCollege: String,
+    CurrentExperience: Number,
+    PositionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Position' },
+    skills: [
+        {
+            skill: String,
+            experience: String,
+            expertise: String,
+        },
+    ],
+    // Position: String,
+    ImageData: {
+        filename: String,
+        path: String,
+        contentType: String,
+    },
+    CreatedBy: String,
+    LastModifiedById: String,
+    ownerId: String,
+    tenantId: String,
+    CreatedDate: { type: Date, default: Date.now }
 });
 
-const Candidate = mongoose.model('Candidate', CandidateSchema);
-module.exports = Candidate;
+
+// const candidateHistorySchema = new mongoose.Schema({
+//     candidateId: { type: mongoose.Schema.Types.ObjectId, ref: 'Candidate' },
+
+//     FirstName: String,
+//     LastName: String,
+//     Email: String,
+//     Phone: String,
+//     Date_Of_Birth: Date,
+//     Gender: String,
+//     HigherQualification: String,
+//     UniversityCollege: String,
+//     CurrentExperience: Number,
+//     PositionId: String,
+//     skills: [
+//         {
+//             skill: String,
+//             experience: String,
+//             expertise: String,
+//         },
+//     ],
+//     // Position: String,
+//     ImageData: {
+//         filename: String,
+//         path: String,
+//         contentType: String,
+//     },
+//     CreatedBy: String,
+//     LastModifiedById: String,
+//     ownerId: String,
+//     orgId: String,
+
+//     ModifiedDate: { type: Date, default: Date.now },
+//     ModifiedBy: String,
+// });
+
+const Candidate = mongoose.model("Candidate", candidateSchema);
+// const CandidateHistory = mongoose.model("CandidateHistory", candidateHistorySchema);
+
+module.exports = { Candidate };

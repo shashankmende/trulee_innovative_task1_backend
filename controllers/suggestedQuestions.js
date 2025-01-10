@@ -1,23 +1,21 @@
-const { SuggestedQuestion } = require("../models/suggestedQuestions")
+const { SuggestedQuestion } = require("../models/SuggestedQuestion")
 
 const createQuestion =async(req,res)=>{
     const {questionText,questionType,isInterviewQuestionOnly,technology,skill,tags,difficultyLevel,score,correctAnswer,options,hints,isAutoAssessment,autoAssessment,programming,isActive,createdDate,createdBy,modifiedDate,modifiedBy}=req.body 
 
     try {
         const lastQuestion = await SuggestedQuestion.findOne()
-     .sort({createdDate:-1})//sort by created
-     .select("questionNo");// select only the questionNo field
+     .sort({createdDate:-1})
+     .select("questionNo");
      let nextQuestionNo = 'SUGQ-00000';
 
 if (lastQuestion && lastQuestion.questionNo) {
-    // Extract the numeric part of the last question number
     const lastNumber = Number(lastQuestion.questionNo.split('-')[1]);
 
-    // Increment the numeric part
+    
     const requiredNumber = lastNumber + 1;
 
-    // Dynamically calculate padding based on the length of the numeric part
-    const totalLength = lastQuestion.questionNo.split('-')[1].length; // Length of the numeric part
+    const totalLength = lastQuestion.questionNo.split('-')[1].length; 
     nextQuestionNo = `SUGQ-${requiredNumber.toString().padStart(totalLength, "0")}`;
 }
 console.log(nextQuestionNo)
