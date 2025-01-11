@@ -521,10 +521,12 @@ app.post('/assessment', async (req, res) => {
 
 
 const { isValidObjectId } = require('mongoose');
+const Section = require('./models/Sections.js')
 
 app.patch('/assessment/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    console.log("requ body",req.body)
 
     // Validate the ID
     if (!isValidObjectId(id)) {
@@ -571,6 +573,15 @@ app.post('/assessment-questions',async(req,res)=>{
   }
 })
 
+
+app.post('/section',async(req,res)=>{
+  try {
+    const section = await Section(req.body)
+    res.status(201).send({success:true,message:"Section Added",section})
+  } catch (error) {
+    res.status(500).send({success:false,message:"Failed to add section",error:error.message})
+  }
+})
 
 
 ConnectDb().then(()=>{

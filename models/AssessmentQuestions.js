@@ -6,8 +6,8 @@ const assessmentQuestionsSchema = new mongoose.Schema({
     questionId:{type:mongoose.Schema.Types.ObjectId,required:true},
     source:{type:String,enum:["system","custom"],required:true},
     snapshot:{type:mongoose.Schema.Types.Mixed,required:true},
-    // order:Number,
-    order:String,
+    order:Number,
+    // order:String,
     customizations:{type:mongoose.Schema.Types.Mixed,default:null}
 })
 

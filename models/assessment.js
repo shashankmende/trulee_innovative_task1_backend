@@ -39,9 +39,10 @@ const questionSchema = new mongoose.Schema({
 });
 
 const sectionSchema = new mongoose.Schema({
-    Category: String,
+    // Category: String,
     SectionName: String,
-    Questions: [questionSchema],
+    // Questions: [questionSchema],
+    Questions:[{type:mongoose.Schema.Types.ObjectId,ref:"assessmentQuestions"}]
     // passScore: Number,
     // CreatedDate: {
     //     type: Date,
@@ -60,10 +61,13 @@ const assessmentSchema = new mongoose.Schema({
     DifficultyLevel: String,
     NumberOfQuestions: Number,
     ExpiryDate: Date,
-    Sections: {
-        type: [sectionSchema],
-        default: undefined 
-      },
+    // Sections: {
+    //     type: [sectionSchema],
+    //     default: undefined 
+    //   },
+    Sections: [
+        sectionSchema
+    ],
     CandidateDetails: {
         includePosition: { type: Boolean, default: false },
         includePhone: { type: Boolean, default: false },
