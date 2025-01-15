@@ -84,8 +84,8 @@ const assessmentSchema = new mongoose.Schema({
         type: [mongoose.Schema.Types.ObjectId],
         default: undefined
       },
-    OwnerId: String,
-    orgId: String,
+    ownerId: String,
+    tenantId: String,
 });
 
 // const assessmentHistorySchema = new mongoose.Schema({

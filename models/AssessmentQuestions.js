@@ -7,9 +7,8 @@ const assessmentQuestionsSchema = new mongoose.Schema({
     source:{type:String,enum:["system","custom"],required:true},
     snapshot:{type:mongoose.Schema.Types.Mixed,required:true},
     order:Number,
-    // order:String,
     customizations:{type:mongoose.Schema.Types.Mixed,default:null}
-})
+},{timestamps:true})
 
 module.exports  = mongoose.model("assessmentQuestions",assessmentQuestionsSchema)
 

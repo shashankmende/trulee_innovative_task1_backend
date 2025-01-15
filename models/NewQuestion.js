@@ -48,6 +48,7 @@ const TenentQuestionsSchema = new mongoose.Schema({
     score: String,
     correctAnswer: String,
     options: [String],
+    // options: [{type:String,required:false}],
     hints: String,
     charLimits: { 
         min: Number,
