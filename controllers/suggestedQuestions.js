@@ -1,7 +1,8 @@
-const { SuggestedQuestion } = require("../models/SuggestedQuestion")
+const { SuggestedQuestion } = require('../models/SuggestedQuestion');
+
 
 const createQuestion =async(req,res)=>{
-    const {questionText,questionType,isInterviewQuestionOnly,technology,skill,tags,difficultyLevel,score,correctAnswer,options,hints,isAutoAssessment,autoAssessment,programming,isActive,createdDate,createdBy,modifiedDate,modifiedBy}=req.body 
+    const {questionText,questionType,isInterviewQuestionOnly,technology,skill,tags,difficultyLevel,correctAnswer,options,hints,isAutoAssessment,autoAssessment,programming,isActive,createdDate,createdBy,modifiedDate,modifiedBy}=req.body 
 
     try {
         const lastQuestion = await SuggestedQuestion.findOne()
@@ -28,7 +29,7 @@ console.log(nextQuestionNo)
             skill,
             tags,
             difficultyLevel,
-            score,
+            // score,
             correctAnswer,
             options,
             hints,

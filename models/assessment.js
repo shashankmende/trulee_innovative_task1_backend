@@ -29,28 +29,12 @@ const questionSchema = new mongoose.Schema({
         min: Number,
         max: Number
     },
-    // CreatedBy: String,
-    // CreatedDate: {
-    //     type: Date,
-    //     default: Date.now
-    // },
-    // ModifiedDate: Date,
-    // ModifiedBy: String,
 });
 
 const sectionSchema = new mongoose.Schema({
-    // Category: String,
     SectionName: String,
-    // Questions: [questionSchema],
     Questions:[{type:mongoose.Schema.Types.ObjectId,ref:"assessmentQuestions"}]
-    // passScore: Number,
-    // CreatedDate: {
-    //     type: Date,
-    //     default: Date.now
-    // },
-    // CreatedById: String,
-    // LastModifiedById: String,
-    // OwnerId: String,
+
 });
 
 const assessmentSchema = new mongoose.Schema({
@@ -61,17 +45,12 @@ const assessmentSchema = new mongoose.Schema({
     DifficultyLevel: String,
     NumberOfQuestions: Number,
     ExpiryDate: Date,
-    // Sections: {
-    //     type: [sectionSchema],
-    //     default: undefined 
-    //   },
     Sections: [
         sectionSchema
     ],
     CandidateDetails: {
         includePosition: { type: Boolean, default: false },
         includePhone: { type: Boolean, default: false },
-        // includeSkills: { type: Boolean, default: false },
     },
     Instructions: String,
     AdditionalNotes: String,
@@ -80,32 +59,12 @@ const assessmentSchema = new mongoose.Schema({
     CreatedBy: String,
     ModifiedDate: Date,
     ModifiedBy: String,
-    CandidateIds: {
-        type: [mongoose.Schema.Types.ObjectId],
-        default: undefined
-      },
+    status:{type:String,enum:["Active","Inactive"]},
     ownerId: String,
     tenantId: String,
 });
 
-// const assessmentHistorySchema = new mongoose.Schema({
-//     assessmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Assessment' },
-//     AssessmentTitle: String,
-//     AssessmentType: [String],
-//     Position: String,
-//     Duration: String,
-//     TotalScore: Number,
-//     DifficultyLevel: String,
-//     NumberOfQuestions: Number,
-//     ExpiryDate: Date,
-//     Sections: [sectionSchema],
-//     CreatedBy: String,
-//     CandidateIds: [mongoose.Schema.Types.ObjectId],
-//     OwnerId: String,
-//     orgId: String,
-//     ModifiedDate: { type: Date, default: Date.now },
-//     ModifiedBy: String,
-// });
+
 
 const Assessment = mongoose.model("assessment", assessmentSchema);
 // const AssessmentHistory = mongoose.model("AssessmentHistory", assessmentHistorySchema);

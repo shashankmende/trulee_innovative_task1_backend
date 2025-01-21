@@ -2,7 +2,7 @@
 
 exports.addAssessmentQuestion = async(req,res)=>{
   try {
-    const question = await AssessmentQuestionsSchema(req.body)
+    const question = await a(req.body)
     await question.save()
     return res.status(201).send({
       success:true,
@@ -27,7 +27,7 @@ exports.getAssessmentQuestionsBasedOnAssessmentId  = async (req, res) => {
       return res.status(400).send({ message: "Invalid assessment ID", success: false });
     }
 
-    const questions = await AssessmentQuestionsSchema.find({ assessmentId: id })
+    const questions = await a.find({ assessmentId: id })
       .sort({ createdAt: -1 })
       .limit(1);
 
@@ -64,7 +64,7 @@ exports.deleteAssessmentQuestion =  async (req, res) => {
   
     try {
       
-      const deletedDoc = await AssessmentQuestionsSchema.findById(id);
+      const deletedDoc = await a.findById(id);
   
       if (!deletedDoc) {
         return res.status(404).send({

@@ -34,10 +34,10 @@
 // });
 const mongoose = require('mongoose');
 
-const TenentQuestionsSchema = new mongoose.Schema({
+const TenantQuestionsSchema = new mongoose.Schema({
     questionNo: String,
     suggestedQuestionId: { type: mongoose.Schema.Types.ObjectId, ref: 'suggestedQuestions' },
-    tenentListId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'TenentQuestionsListNames' }],
+    tenantListId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'TenantQuestionsListNames' }],
     isCustom: { type: Boolean, default: false },
     questionText: String,
     questionType: String,
@@ -45,15 +45,16 @@ const TenentQuestionsSchema = new mongoose.Schema({
     skill: [String],
     tags: [String],
     difficultyLevel: String,
-    score: String,
+    // score: String,
     correctAnswer: String,
     options: [String],
-    // options: [{type:String,required:false}],
     hints: String,
     charLimits: { 
         min: Number,
         max: Number
     },
+    minexperience: Number,
+    maxexperience: Number,
     isAutoAssessment: Boolean,
     autoAssessment: {
         criteria: String,
@@ -85,18 +86,17 @@ const TenentQuestionsSchema = new mongoose.Schema({
     createdBy: String,
     modifiedDate: Date,
     modifiedBy: String,
-    tenentId: String,
+    tenantId: String,
     ownerId: String,
 });
 
-TenentQuestionsSchema.pre('save', function (next) {
+TenantQuestionsSchema.pre('save', function (next) {
     if (this.isNew) {
         this.CreatedDate = Date.now();
     }
     next();
 });
 
-// const TenentQuestions = mongoose.model("tenentQuestions", TenentQuestionsSchema);
-const TenentQuestions = mongoose.model("tenentQuestions", TenentQuestionsSchema);
+const TenantQuestions  = mongoose.model("tenantQuestions", TenantQuestionsSchema);
 
-module.exports = { TenentQuestions };
+module.exports = { TenantQuestions  };

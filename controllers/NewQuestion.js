@@ -45,15 +45,16 @@ const TenentQuestionsSchema = new mongoose.Schema({
     skill: [String],
     tags: [String],
     difficultyLevel: String,
-    score: String,
+    // score: String,
     correctAnswer: String,
     options: [String],
-    // options: [{type:String,required:false}],
     hints: String,
     charLimits: { 
         min: Number,
         max: Number
     },
+    minexperience: Number,
+    maxexperience: Number,
     isAutoAssessment: Boolean,
     autoAssessment: {
         criteria: String,
@@ -96,7 +97,6 @@ TenentQuestionsSchema.pre('save', function (next) {
     next();
 });
 
-// const TenentQuestions = mongoose.model("tenentQuestions", TenentQuestionsSchema);
 const TenentQuestions = mongoose.model("tenentQuestions", TenentQuestionsSchema);
 
 module.exports = { TenentQuestions };

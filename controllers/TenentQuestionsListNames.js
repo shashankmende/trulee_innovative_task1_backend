@@ -1,13 +1,13 @@
 const QuestionbankFavList = require("../models/questionbankFavList");
 
 const createList = async (req, res) => {
-    const { label, ownerId, tenentId, name } = req.body;
+    const { label, ownerId, tenantId, name } = req.body;
   
     try {
       const newList = await QuestionbankFavList.create({
         label,
         ownerId,
-        tenentId: tenentId || null,
+        tenantId: tenantId || null,
         name,
       });
       res.status(201).json(newList);

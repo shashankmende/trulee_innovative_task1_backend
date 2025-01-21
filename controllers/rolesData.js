@@ -1,21 +1,21 @@
-// const RolesData = require("../models/RolesData");
-
-// const Role = require("../models/ro")
-
-// exports.getRolesBasedOnOrganization = async (req, res) => {
-//     const { organizationId } = req.params;
-//     try {
-//       const roles = await RolesData.find({ organizationId }).populate('reportsToRoleId');
-//       if (!roles || roles.length === 0) {
-//         return res.status(404).json({ message: 'No roles found for this organization' });
-//       }
-//       res.status(200).json(roles);
-//     } catch (error) {
-//       res.status(500).json({ message: 'Error fetching roles', error: error.message });
-//     }
-//   }
+const Role = require("../models/RolesData");
 
 
+exports.getRolesDataBasedonOrganization = async (req, res) => {
+    const { organizationId } = req.params;
+    try {
+      const roles = await RolesData.find({ organizationId }).populate('reportsToRoleId');
+      if (!roles || roles.length === 0) {
+        return res.status(404).json({ message: 'No roles found for this organization' });
+      }
+      res.status(200).json(roles);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching roles', error: error.message });
+    }
+  }
+
+
+  
   exports.getRoleBasedOnId = async (req, res) => {
     try {
       const { id } = req.params;

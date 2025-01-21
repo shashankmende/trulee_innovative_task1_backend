@@ -1,6 +1,6 @@
 
 const express = require("express")
-const { newQuestion, getFormattedQuestions } = require("../controllers/tenantQuestions")
+const { newQuestion, getFormattedQuestions } = require("../controllers/myQuestionsList")
 
 const router = express.Router()
 

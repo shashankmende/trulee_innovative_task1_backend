@@ -1,3 +1,4 @@
+const { HigherQualification } = require("../models/higherqualification");
 
 
 exports.getQualifications =  async (req, res) => {

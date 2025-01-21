@@ -1,6 +1,8 @@
 const { TenentQuestions } = require("../models/NewQuestion");
 
 
+//change name to myQuestionsList
+
 exports.newQuestion =  async (req, res) => {
     try {
       const newquestion = new TenentQuestions(req.body); // Directly use req.body
