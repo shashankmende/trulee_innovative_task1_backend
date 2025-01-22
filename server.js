@@ -1,5 +1,7 @@
 require("dotenv").config();
 const CryptoJS = require('crypto-js');
+const crypto = require('crypto');
+
 const mongoose = require("mongoose");
 const express = require("express");
 const ConnectDb = require("./utils/db");
@@ -19,6 +21,8 @@ const { Skills } = require("./models/skills.js");
 const Profile = require("./models/Profile.js");
 const Role = require("./models/RolesData.js");
 const nodemailer = require("nodemailer")
+const { authenticator } = require('otplib');
+
 const {
   HigherQualifications,
   HigherQualification,
@@ -62,7 +66,7 @@ app.use("/suggested-questions", suggestedQuestionRouter);
 // app.use('/skills',suggestedQuestionsSKillsRoute)
 app.use("/interview-questions", interviewQuestionsRoute);
 app.use("/tenant-list", TenentQuestionsListNamesRoute);
-
+const Otp = require('./models/Otp.js')
 const candidateRoutes = require('./routes/candidateRoutes');
 app.use('/candidate', candidateRoutes);
 
@@ -296,12 +300,34 @@ app.post('/schedule-assessment',async(req,res)=>{
   }
 })
 
+//based on assessment id
 app.get('/schedule-assessment/:id',async(req,res)=>{
   try {
     const {id}=req.params
-    // console.log('req param',req.params)
-    // console.log('id',id)
     const scheduledAssessment = await scheduledAssessmentsSchema.find({assessmentId:id}).populate('createdBy',"Firstname").populate('assessmentId')
+    console.log("scheduled assesmne,",scheduledAssessment)
+    return res.status(200).send({
+      message:"Retrieved scheduled assessments",
+      success:true,
+      scheduledAssessment
+    })
+  } catch (error) {
+    console.log("error in getting scheduled assessment from backed",error)
+    res.status(500).send({
+      message:"Failed to get scheduled assessment",
+      success:false,
+      error:error.message
+    })
+  }
+})
+
+//based on scheduleasessment id
+
+app.get('/schedule-assessments-list/:id',async(req,res)=>{
+  try {
+    const {id}=req.params
+    const scheduledAssessment = await scheduledAssessmentsSchema.findById(id).populate({path:"assessmentId",populate:{path:"Sections.Questions"}})
+    // const scheduledAssessment = await scheduledAssessmentsSchema.findById(id).populate('createdBy',"Firstname").populate('assessmentId')
     console.log("scheduled assesmne,",scheduledAssessment)
     return res.status(200).send({
       message:"Retrieved scheduled assessments",
@@ -457,75 +483,249 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// const encrypt = (text, secretKey) => {
+//   return CryptoJS.AES.encrypt(text, secretKey).toString();
+// };
+
+
+
+
+// const generateOTP = () => {
+//   // Generate a unique secret (store it securely for each user)
+//   const secret = authenticator.generateSecret();
+  
+//   // Generate the TOTP based on the secret
+//   const otp = authenticator.generate(secret);
+
+//   return { otp, secret }; // Return both OTP and secret
+// };
 const encrypt = (text, secretKey) => {
-  return CryptoJS.AES.encrypt(text, secretKey).toString();
-};
+  const encrypted = CryptoJS.AES.encrypt(text, secretKey).toString();
+  return encodeURIComponent(encrypted); // Make it URL-safe
+}
 
-app.post('/send-assessment-link', async (req, res) => {
-  const { scheduledAssessmentId } = req.body;
- 
-  // const { assessmentId,candidateEmails } = req.body;
-  // const { candidateEmails, assessmentId, notes, sections, questions } = req.body;
-const candidateEmails =["shashankmende88@gmail.com"]
-const notes="notes text"
+function generateOTP(candidateId, interval = 180) {
+  try {
+    const time = Math.floor(Date.now() / 1000 / interval);
+    const secret = `${candidateId}${process.env.HMAC_SECRET || 'default-secret'}`;
+    const hmac = crypto.createHmac('sha1', secret);
+    hmac.update(Buffer.from(time.toString()));
+    const hash = hmac.digest('hex');
+    const offset = parseInt(hash[hash.length - 1], 16);
+    const binary = parseInt(hash.substr(offset * 2, 8), 16) & 0x7fffffff;
+
+    // Generate a 4-digit OTP
+    const otp = binary % 10 ** 4;
+    return otp.toString().padStart(4, '0'); // Ensures OTP is always 4 digits
+  } catch (error) {
+    console.error('Error generating OTP:', error);
+    throw new Error('Unable to generate OTP');
+  }
+}
 
 
-  // Log the incoming request data
-  // console.log('Received request to send assessment link:', {
-  //   candidateEmails,
-  //   assessmentId,
-  //   notes,
-  //   sections,
-  //   questions
-  // });
+app.post('/verify-otp', async (req, res) => {
+  const { candidateId, scheduledAssessmentId, otp } = req.body;
+console.log("req body",req.body)
+  // Check for missing fields
+  if (!candidateId || !scheduledAssessmentId || !otp) {
+    return res.status(400).json({ 
+      isValid: false, 
+      message: 'Missing required fields.' 
+    });
+  }
 
   try {
-    // const assessment = await Assessment.findById(assessmentId);
-    const assessment = await scheduledAssessmentsSchema.findById(scheduledAssessmentId);
+    // Check if OTP exists in the database
+    const storedOtp = await Otp.findOne({ candidateId, scheduledAssessmentId });
+    console.log("stored otp",storedOtp)
+    if (!storedOtp) {
+      return res.status(404).json({ 
+        isValid: false, 
+        message: 'OTP not found. Please request a new one.' 
+      });
+    }
 
-    // Log if the assessment is not found
+    // Check if OTP has expired
+    if (new Date() > storedOtp.expiresAt) {
+      return res.status(410).json({ 
+        isValid: false, 
+        message: 'OTP has expired. Please request a new one.' 
+      });
+    }
+
+    // Validate OTP
+    const isValid = String(storedOtp.otp) === String(otp); // Ensure type safety
+
+    if (isValid) {
+      // Delete OTP after successful validation
+      await Otp.findByIdAndDelete(storedOtp._id);
+
+      return res.status(200).json({ 
+        isValid: true, 
+        message: 'OTP is valid.' 
+      });
+    } else {
+      return res.status(400).json({ 
+        isValid: false, 
+        message: 'Invalid OTP.' 
+      });
+    }
+  } catch (error) {
+    console.error('Error verifying OTP:', error);
+
+    return res.status(500).json({ 
+      isValid: false, 
+      message: 'Internal server error. Please try again.' 
+    });
+  }
+});
+
+app.post('/resend-link', async (req, res) => {
+  const { Email, scheduledAssessmentId } = req.body;
+
+  if (!Email || !scheduledAssessmentId) {
+    return res.status(400).json({ message: 'Missing required fields: Email or scheduledAssessmentId' });
+  }
+
+  try {
+    // Check if the scheduled assessment exists
+    const assessment = await scheduledAssessmentsSchema.findById(scheduledAssessmentId);
     if (!assessment) {
       console.error('Assessment not found for ID:', scheduledAssessmentId);
       return res.status(404).json({ message: 'Assessment not found' });
     }
 
-    // Iterate over candidate emails and send individual links
-    for (const email of candidateEmails) {
-      // const candidate = await Candidate.findOne({ Email: email });
-      // if (!candidate) {
-      //   console.error('Candidate not found for email:', email);
-      //   continue;
-      // }
-      const candidateId ='candidateid1344'
-      const secretKey = 'test';
-      const encryptedAssessmentId = encrypt(scheduledAssessmentId, secretKey);
-      const encryptedCandidateId = encrypt(candidateId,secretKey)
-      // const link = `http://localhost:3000/assessmenttest?assessmentId=${assessmentId}&candidateId=${candidate._id};`
-      const link = `http://localhost:3000/assessmenttest?assessmentId=${encryptedAssessmentId}&candidateId=${encryptedCandidateId};`
+    let candidate;
+
+    // Handle hardcoded Email (for debugging or special cases)
+    if (Email === "shashankmende88@gmail.com") {
+      candidate = { _id: "678667944d254aa33c527433" };
+    } else {
+      // Find the candidate by Email
+      candidate = await Candidate.findOne({ Email });
+      if (!candidate) {
+        console.error('Candidate not found for email:', Email);
+        return res.status(404).json({ message: 'Candidate not found' });
+      }
+    }
+
+    // Fetch and update the OTP for the candidate and assessment
+    const otp = generateOTP(candidate._id); // Generate a new OTP
+    // Try updating the OTP document
+    let updatedOtp = await Otp.findOneAndUpdate(
+      { scheduledAssessmentId, candidateId: candidate._id }, // Match both fields
+      { otp }, // Update the OTP field
+      { new: true } // Return the updated document
+    );
+
+    // If no OTP document is found, create a new one
+    if (!updatedOtp) {
+      console.log('No existing OTP document found. Creating a new one.');
+      updatedOtp = await Otp.create({
+        scheduledAssessmentId,
+        candidateId: candidate._id,
+        otp,
+        expiresAt:new Date(Date.now()+90*1000)
+      });
+    }
+
+    // Generate the assessment link
+    const link = `http://localhost:3000/assessmenttest?assessmentId=${scheduledAssessmentId}&candidateId=${candidate._id}`;
+
+    // Email options
+    const mailOptions = {
+      from: 'ashrafshaik250@gmail.com',
+      to: Email,
+      subject: 'Assessment Invitation',
+      text: `You have been invited to participate in an assessment. Use this link: ${link}. Your OTP is ${updatedOtp.otp}, valid for 90 seconds.`,
+    };
+
+    // Send the email
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log('Email sent successfully to:', Email);
+      return res.status(200).json({ message: 'Email re-sent successfully' });
+    } catch (emailError) {
+      console.error('Error sending email to:', Email, emailError);
+      return res.status(500).json({ message: 'Failed to send email', error: emailError.message });
+    }
+  } catch (error) {
+    console.error('Error processing resend-link request:', error);
+    return res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+});
+
+
+
+app.post('/send-assessment-link', async (req, res) => {
+  const { scheduledAssessmentId, candidateEmails } = req.body;
+  // const notes = "notes text";
+
+  try {
+    const assessment = await scheduledAssessmentsSchema.findById(scheduledAssessmentId);
+    if (!assessment) {
+      console.error('Assessment not found for ID:', scheduledAssessmentId);
+      return res.status(404).json({ message: 'Assessment not found' });
+    }
+
+    const uniqueEmails = new Set([...candidateEmails, "shashankmende88@gmail.com"]);
+    // const uniqueEmails = new Set([...candidateEmails, "shashankmende88@gmail.com","shashankyadavmende79@gmail.com"]);
+    // const secretKey = 'test';
+    const secretKey = process.env.SECRET_KEY || 'test-secret';
+    
+
+
+    for (const email of uniqueEmails) {
+      
+      
+       const candidate = await Candidate.findOne({ Email: email });
+        if (!candidate) {
+          console.error('Candidate not found for email:', email);
+          
+        }
+    
+      const otp= generateOTP(candidate._id)
+      // const expiresAt = new Date(new Date()+90*1000)
+      const expiresAt = new Date(Date.now() + 90 * 1000);
+
+      await Otp.create({scheduledAssessmentId,candidateId:candidate._id,otp,expiresAt})
+      let encryptedAssessmentId, encryptedCandidateId;
+      try {
+        encryptedAssessmentId = encrypt(scheduledAssessmentId, secretKey);
+        encryptedCandidateId = encrypt(candidate._id, secretKey);
+      } catch (encryptionError) {
+        console.error('Encryption failed for email:', email, encryptionError);
+        continue;
+      }
+
+      // const link = `http://localhost:3000/assessmenttest?assessmentId=${encryptedAssessmentId}&candidateId=${encryptedCandidateId}`;
+      const link = `http://localhost:3000/assessmenttest?assessmentId=${scheduledAssessmentId}&candidateId=${candidate._id}`;
       const mailOptions = {
         from: 'ashrafshaik250@gmail.com',
         to: email,
         subject: 'Assessment Invitation',
-        text: `You have been invited to participate in an assessment. Please follow this link: ${link}`
-        // text: `You have been invited to participate in an assessment. Please follow this link: ${link}\n\nNotes: ${notes}\n\nSections: ${JSON.stringify(sections)}\n\nQuestions: ${JSON.stringify(questions)}`
+        text: `You have been invited to participate in an assessment. Use this link: ${link}. Your OTP is ${otp}, valid for 90 seconds.`,
       };
+      
 
-      // Log the mail options before sending
       console.log('Sending email with options:', mailOptions);
 
-      await transporter.sendMail(mailOptions);
-
-      // Log success message
-      console.log('Email sent successfully to:', email);
+      try {
+        await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully to:', email);
+      } catch (emailError) {
+        console.error('Error sending email to:', email, emailError);
+      }
     }
 
     res.status(200).json({ message: 'Emails sent successfully' });
   } catch (error) {
-    // Log the error details
     console.error('Error sending email:', error);
     res.status(500).json({ message: 'Error sending email', error: error.message });
   }
 });
+
 
 app.get('/assessment-details/:assessmentId', async (req, res) => {
   try {
