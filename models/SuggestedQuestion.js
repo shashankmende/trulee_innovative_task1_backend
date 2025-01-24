@@ -50,6 +50,10 @@ const suggestedQuestionSchema = new mongoose.Schema({
     isAutoAssessment: Boolean,
     minexperience: Number,
     maxexperience: Number,
+    charLimits: { 
+        min: Number,
+        max: Number
+    },
     autoAssessment: {
         criteria: String,
         expectedAnswer: String,

@@ -1,6 +1,6 @@
 require("dotenv").config();
-const CryptoJS = require('crypto-js');
-const crypto = require('crypto');
+const CryptoJS = require("crypto-js");
+const crypto = require("crypto");
 
 const mongoose = require("mongoose");
 const express = require("express");
@@ -20,8 +20,8 @@ const { Users } = require("./models/Users.js");
 const { Skills } = require("./models/skills.js");
 const Profile = require("./models/Profile.js");
 const Role = require("./models/RolesData.js");
-const nodemailer = require("nodemailer")
-const { authenticator } = require('otplib');
+const nodemailer = require("nodemailer");
+const { authenticator } = require("otplib");
 
 const {
   HigherQualifications,
@@ -50,9 +50,6 @@ const {
   getUniversityCollegeNames,
 } = require("./controllers/universityCollegeName.js");
 
-
-
-
 const app = express();
 const PORT = process.env.PORT;
 
@@ -66,10 +63,9 @@ app.use("/suggested-questions", suggestedQuestionRouter);
 // app.use('/skills',suggestedQuestionsSKillsRoute)
 app.use("/interview-questions", interviewQuestionsRoute);
 app.use("/tenant-list", TenentQuestionsListNamesRoute);
-const Otp = require('./models/Otp.js')
-const candidateRoutes = require('./routes/candidateRoutes');
-app.use('/candidate', candidateRoutes);
-
+const Otp = require("./models/Otp.js");
+const candidateRoutes = require("./routes/candidateRoutes");
+app.use("/candidate", candidateRoutes);
 
 app.use("/tenant", TenantRoute);
 const {
@@ -96,7 +92,7 @@ const {
   addAssessmentQuestion,
   getAssessmentQuestionsBasedOnAssessmentId,
   updateAssessmentQuestion,
-  deleteAssessmentQuestion
+  deleteAssessmentQuestion,
 } = require("./controllers/assessment.js");
 const {
   getRolesDataBasedonOrganization,
@@ -104,8 +100,8 @@ const {
   getRolesDataBasedonId,
   getRolesDataBasedOnOrganization,
 } = require("./controllers/rolesData.js");
-const { Candidate } = require('./models/candidate.js');
-const {Position} = require("./models/position.js");
+const { Candidate } = require("./models/candidate.js");
+const { Position } = require("./models/position.js");
 const scheduledAssessmentsSchema = require("./models/scheduledAssessmentsSchema.js");
 const { CandidateAssessment } = require("./models/candidateAssessment.js");
 
@@ -128,7 +124,7 @@ app.get("/skills", async (req, res) => {
 });
 
 const modelMapping = {
-  'candidate': Candidate,
+  candidate: Candidate,
   // 'position': Position,
   // 'team': Team,
   assessment: Assessment,
@@ -219,7 +215,9 @@ app.get("/api/:model", async (req, res) => {
     res.status(200).json(data);
   } catch (error) {
     console.error(`Error fetching data for ${model}:`, error);
-    res.status(500).json({ message: "Internal server error", error:error.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 });
 
@@ -279,112 +277,132 @@ app.patch("/assessment-questions", updateAssessmentQuestion);
 
 app.post("/section", addSection);
 
-//scheduled assessment 
-app.post('/schedule-assessment',async(req,res)=>{
+//scheduled assessment
+app.post("/schedule-assessment", async (req, res) => {
   try {
-    const scheduledAssessment = await scheduledAssessmentsSchema(req.body)
-    await scheduledAssessment.save()
+    const scheduledAssessment = await scheduledAssessmentsSchema(req.body);
+    await scheduledAssessment.save();
     // console.log('schedule assessment',scheduledAssessment)
     res.status(201).send({
-      success:true,
-      message:"Assessment Scheduled",
-      assessment:scheduledAssessment
-    })
+      success: true,
+      message: "Assessment Scheduled",
+      assessment: scheduledAssessment,
+    });
   } catch (error) {
-    console.log("error in scheduling assessment",error)
+    console.log("error in scheduling assessment", error);
     res.status(500).send({
-      message:"Failed to schedule assessment",
-      success:false,
-      error:error.message,
-    })
+      message: "Failed to schedule assessment",
+      success: false,
+      error: error.message,
+    });
   }
-})
+});
 
 //based on assessment id
-app.get('/schedule-assessment/:id',async(req,res)=>{
+app.get("/schedule-assessment/:id", async (req, res) => {
   try {
-    const {id}=req.params
-    const scheduledAssessment = await scheduledAssessmentsSchema.find({assessmentId:id}).populate('createdBy',"Firstname").populate('assessmentId')
-    console.log("scheduled assesmne,",scheduledAssessment)
+    const { id } = req.params;
+    const scheduledAssessment = await scheduledAssessmentsSchema
+      .find({ assessmentId: id })
+      .populate("createdBy", "Firstname")
+      .populate("assessmentId");
+    console.log("scheduled assesmne,", scheduledAssessment);
     return res.status(200).send({
-      message:"Retrieved scheduled assessments",
-      success:true,
-      scheduledAssessment
-    })
+      message: "Retrieved scheduled assessments",
+      success: true,
+      scheduledAssessment,
+    });
   } catch (error) {
-    console.log("error in getting scheduled assessment from backed",error)
+    console.log("error in getting scheduled assessment from backed", error);
     res.status(500).send({
-      message:"Failed to get scheduled assessment",
-      success:false,
-      error:error.message
-    })
+      message: "Failed to get scheduled assessment",
+      success: false,
+      error: error.message,
+    });
   }
-})
+});
 
 //based on scheduleasessment id
 
-app.get('/schedule-assessments-list/:id',async(req,res)=>{
+app.get("/schedule-assessments-list/:id", async (req, res) => {
   try {
-    const {id}=req.params
-    const scheduledAssessment = await scheduledAssessmentsSchema.findById(id).populate({path:"assessmentId",populate:{path:"Sections.Questions"}})
+    const { id } = req.params;
+    const scheduledAssessment = await scheduledAssessmentsSchema
+      .findById(id)
+      .populate({
+        path: "assessmentId",
+        populate: { path: "Sections.Questions" },
+      });
     // const scheduledAssessment = await scheduledAssessmentsSchema.findById(id).populate('createdBy',"Firstname").populate('assessmentId')
-    console.log("scheduled assesmne,",scheduledAssessment)
+    console.log("scheduled assesmne,", scheduledAssessment);
     return res.status(200).send({
-      message:"Retrieved scheduled assessments",
-      success:true,
-      scheduledAssessment
-    })
+      message: "Retrieved scheduled assessments",
+      success: true,
+      scheduledAssessment,
+    });
   } catch (error) {
-    console.log("error in getting scheduled assessment from backed",error)
+    console.log("error in getting scheduled assessment from backed", error);
     res.status(500).send({
-      message:"Failed to get scheduled assessment",
-      success:false,
-      error:error.message
-    })
+      message: "Failed to get scheduled assessment",
+      success: false,
+      error: error.message,
+    });
   }
-})
+});
 
-app.patch('/schedule-assessment/:id',async(req,res)=>{
+app.patch("/schedule-assessment/:id", async (req, res) => {
   try {
-    const {id}=req.params
-    const updateScheduleAssessment = await scheduledAssessmentsSchema.findOneAndUpdate({_id:id},{status:"cancelled"},{new:true})
+    const { id } = req.params;
+    const updateScheduleAssessment =
+      await scheduledAssessmentsSchema.findOneAndUpdate(
+        { _id: id },
+        { status: "cancelled" },
+        { new: true }
+      );
     const updateCandidateAssessments = await CandidateAssessment.updateMany(
       { scheduledAssessmentId: id },
-      { status: "cancelled" },
-      
+      { status: "cancelled" }
     );
     // const docs = await CandidateAssessment.find({scheduledAssessmentId:id})
     // console.log("docs",docs)
     res.status(200).send({
-      message:"scheduled assessment and candidate assessment updated successfully",
-      success:true
-    })
-
+      message:
+        "scheduled assessment and candidate assessment updated successfully",
+      success: true,
+    });
   } catch (error) {
-    console.log("Failed to update status of scheduled assessment and candidate assessment")
+    console.log(
+      "Failed to update status of scheduled assessment and candidate assessment"
+    );
     res.status(500).send({
-      message:"Failed to update status of scheduled assessment and candidate assessment",
-      success:false,
-      error:error.message
-    })
+      message:
+        "Failed to update status of scheduled assessment and candidate assessment",
+      success: false,
+      error: error.message,
+    });
   }
-})
+});
 
-
-//candidate assessment schema 
+//candidate assessment schema
 app.post("/candidate-assessment", async (req, res) => {
   try {
     const candidateAssessments = req.body; // Assuming req.body contains an array of assessments
 
-    if (!Array.isArray(candidateAssessments) || candidateAssessments.length === 0) {
+    if (
+      !Array.isArray(candidateAssessments) ||
+      candidateAssessments.length === 0
+    ) {
       return res.status(400).send({
         success: false,
-        message: "Request body must contain a non-empty array of candidate assessments.",
+        message:
+          "Request body must contain a non-empty array of candidate assessments.",
       });
     }
 
     // Use insertMany for bulk insertion
-    const insertedDocs = await CandidateAssessment.insertMany(candidateAssessments);
+    const insertedDocs = await CandidateAssessment.insertMany(
+      candidateAssessments
+    );
 
     return res.status(201).send({
       success: true,
@@ -401,11 +419,12 @@ app.post("/candidate-assessment", async (req, res) => {
   }
 });
 
-
-app.get('/candidate-assessment/:id',async(req,res)=>{
+app.get("/candidate-assessment/:id", async (req, res) => {
   try {
-    const {id}=req.params 
-    const candidateAssessments = await CandidateAssessment.find({scheduledAssessmentId:id}).populate("candidateId","FirstName Email CurrentExperience")
+    const { id } = req.params;
+    const candidateAssessments = await CandidateAssessment.find({
+      scheduledAssessmentId: id,
+    }).populate("candidateId", "FirstName Email CurrentExperience");
     // .populate({
     //   path:"scheduledAssessmentId",
     //   populate:{
@@ -414,24 +433,24 @@ app.get('/candidate-assessment/:id',async(req,res)=>{
     //   }
     // })
     return res.status(200).send({
-      message:"Candidate Assessments Retrieved",
-      success:true,
-      candidateAssessments
-    })
+      message: "Candidate Assessments Retrieved",
+      success: true,
+      candidateAssessments,
+    });
   } catch (error) {
-    console.log("error in getting candidate assessment",error)
+    console.log("error in getting candidate assessment", error);
     return res.status(500).send({
       success: false,
       message: "Failed to get candidate assessments.",
       error: error.message,
     });
   }
-})
+});
 
-app.patch('/candidate-assessment/:id', async (req, res) => {
+app.patch("/candidate-assessment/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Find and update the document, or return 404 if not found
     const updateResult = await CandidateAssessment.findOneAndUpdate(
       { _id: id },
@@ -453,7 +472,10 @@ app.patch('/candidate-assessment/:id', async (req, res) => {
       updatedAssessment: updateResult, // Send only the updated document
     });
   } catch (error) {
-    console.log("Error in updating candidate assessment status:", error.message);
+    console.log(
+      "Error in updating candidate assessment status:",
+      error.message
+    );
     return res.status(500).send({
       success: false,
       message: "Failed to update candidate assessment status",
@@ -462,38 +484,60 @@ app.patch('/candidate-assessment/:id', async (req, res) => {
   }
 });
 
-
-
-app.post('/fetch-content', (req, res) => {
+app.post("/fetch-content", (req, res) => {
   const { sections } = req.body;
-  const content = sections.map(section => ({
+  const content = sections.map((section) => ({
     title: `Content for ${section}`,
-    body: `This is the body content for section ${section}` 
-  })
-)
+    body: `This is the body content for section ${section}`,
+  }));
   res.json(content);
 });
 
+//get candidate assessment based on _id ,purpose: to get candidate id and assessment id out of it.
+app.get('/candidate-assessment/details/:id',async(req,res)=>{
+  try {
+    const {id}= req.params 
+    if (!id){
+      console.log("id is missing")
+      return res.status(400).send({message:"id is missing"})
+    }
+    const document = await CandidateAssessment.findById(id)
+    console.log("document",document)
+    if (!document){
+      console.log("no document found")
+      return res.status(400).send({message:`no document found for given candidate assessment id:${id}`})
+    }
+    return res.status(200).send({
+      message:"Retrieved candidate Assessment",
+      success:true,
+      candidateAssessment:document
+    })
+  } catch (error) {
+    console.log("error in getting candidate assessment details",error)
+    res.status(500).send({
+      success:false,
+      message:"Failed to get candidate assessment details",
+      error:error.message
+    })
+  }
+})
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
-    user: 'ashrafshaik250@gmail.com',
-    pass: 'jqez anin fafs gizf'
-  }
+    user: "ashrafshaik250@gmail.com",
+    pass: "jqez anin fafs gizf",
+  },
 });
 
 // const encrypt = (text, secretKey) => {
 //   return CryptoJS.AES.encrypt(text, secretKey).toString();
 // };
 
-
-
-
 // const generateOTP = () => {
 //   // Generate a unique secret (store it securely for each user)
 //   const secret = authenticator.generateSecret();
-  
+
 //   // Generate the TOTP based on the secret
 //   const otp = authenticator.generate(secret);
 
@@ -502,55 +546,57 @@ const transporter = nodemailer.createTransport({
 const encrypt = (text, secretKey) => {
   const encrypted = CryptoJS.AES.encrypt(text, secretKey).toString();
   return encodeURIComponent(encrypted); // Make it URL-safe
-}
+};
 
 function generateOTP(candidateId, interval = 180) {
   try {
     const time = Math.floor(Date.now() / 1000 / interval);
-    const secret = `${candidateId}${process.env.HMAC_SECRET || 'default-secret'}`;
-    const hmac = crypto.createHmac('sha1', secret);
+    const secret = `${candidateId}${
+      process.env.HMAC_SECRET || "default-secret"
+    }`;
+    const hmac = crypto.createHmac("sha1", secret);
     hmac.update(Buffer.from(time.toString()));
-    const hash = hmac.digest('hex');
+    const hash = hmac.digest("hex");
     const offset = parseInt(hash[hash.length - 1], 16);
     const binary = parseInt(hash.substr(offset * 2, 8), 16) & 0x7fffffff;
 
     // Generate a 4-digit OTP
-    const otp = binary % 10 ** 4;
-    return otp.toString().padStart(4, '0'); // Ensures OTP is always 4 digits
+    const otp = binary % 10 ** 5;
+    return otp.toString().padStart(5, "0"); // Ensures OTP is always 4 digits
   } catch (error) {
-    console.error('Error generating OTP:', error);
-    throw new Error('Unable to generate OTP');
+    console.error("Error generating OTP:", error);
+    throw new Error("Unable to generate OTP");
   }
 }
 
-
-app.post('/verify-otp', async (req, res) => {
+app.post("/verify-otp", async (req, res) => {
   const { candidateId, scheduledAssessmentId, otp } = req.body;
-console.log("req body",req.body)
+  console.log("req body", req.body);
   // Check for missing fields
   if (!candidateId || !scheduledAssessmentId || !otp) {
-    return res.status(400).json({ 
-      isValid: false, 
-      message: 'Missing required fields.' 
+    return res.status(400).json({
+      isValid: false,
+      message: "Missing required fields.",
     });
   }
 
   try {
     // Check if OTP exists in the database
     const storedOtp = await Otp.findOne({ candidateId, scheduledAssessmentId });
-    console.log("stored otp",storedOtp)
+    console.log("stored otp", storedOtp);
     if (!storedOtp) {
-      return res.status(404).json({ 
-        isValid: false, 
-        message: 'OTP not found. Please request a new one.' 
+      return res.status(404).json({
+        isValid: false,
+        message: "OTP not found. Please request a new one.",
       });
     }
 
     // Check if OTP has expired
     if (new Date() > storedOtp.expiresAt) {
-      return res.status(410).json({ 
-        isValid: false, 
-        message: 'OTP has expired. Please request a new one.' 
+      await Otp.findByIdAndDelete(storedOtp._id)
+      return res.status(410).json({
+        isValid: false,
+        message: "OTP has expired. Please request a new one.",
       });
     }
 
@@ -561,215 +607,257 @@ console.log("req body",req.body)
       // Delete OTP after successful validation
       await Otp.findByIdAndDelete(storedOtp._id);
 
-      return res.status(200).json({ 
-        isValid: true, 
-        message: 'OTP is valid.' 
+      return res.status(200).json({
+        isValid: true,
+        message: "OTP is valid.",
       });
     } else {
-      return res.status(400).json({ 
-        isValid: false, 
-        message: 'Invalid OTP.' 
+      return res.status(400).json({
+        isValid: false,
+        message: "Invalid OTP.",
       });
     }
   } catch (error) {
-    console.error('Error verifying OTP:', error);
+    console.error("Error verifying OTP:", error);
 
-    return res.status(500).json({ 
-      isValid: false, 
-      message: 'Internal server error. Please try again.' 
+    return res.status(500).json({
+      isValid: false,
+      message: "Internal server error. Please try again.",
     });
   }
 });
 
-app.post('/resend-link', async (req, res) => {
-  const { Email, scheduledAssessmentId } = req.body;
-
-  if (!Email || !scheduledAssessmentId) {
-    return res.status(400).json({ message: 'Missing required fields: Email or scheduledAssessmentId' });
+app.post("/resend-link", async (req, res) => {
+  const { candidateId, scheduledAssessmentId } = req.body;
+console.log("req body",req.body)
+  if (!candidateId || !scheduledAssessmentId) {
+    return res
+      .status(400)
+      .json({
+        message: "Missing required fields: Email or scheduledAssessmentId",
+      });
   }
 
   try {
     // Check if the scheduled assessment exists
-    const assessment = await scheduledAssessmentsSchema.findById(scheduledAssessmentId);
+    const assessment = await scheduledAssessmentsSchema.findById(
+      scheduledAssessmentId
+    );
     if (!assessment) {
-      console.error('Assessment not found for ID:', scheduledAssessmentId);
-      return res.status(404).json({ message: 'Assessment not found' });
+      console.error("Assessment not found for ID:", scheduledAssessmentId);
+      return res.status(404).json({ message: "Assessment not found" });
     }
 
-    let candidate;
-
-    // Handle hardcoded Email (for debugging or special cases)
-    if (Email === "shashankmende88@gmail.com") {
-      candidate = { _id: "678667944d254aa33c527433" };
-    } else {
-      // Find the candidate by Email
-      candidate = await Candidate.findOne({ Email });
-      if (!candidate) {
-        console.error('Candidate not found for email:', Email);
-        return res.status(404).json({ message: 'Candidate not found' });
-      }
+    
+    const candidate = await Candidate.findOne({_id: candidateId });
+    if (!candidate) {
+      console.error("Candidate not found for candidateId:", candidateId);
+      return res.status(404).json({ message: "Candidate not found" });
     }
+    console.log("candidate",candidate)
 
-    // Fetch and update the OTP for the candidate and assessment
-    const otp = generateOTP(candidate._id); // Generate a new OTP
-    // Try updating the OTP document
+    
+    const otp = generateOTP(candidate._id); 
+    
     let updatedOtp = await Otp.findOneAndUpdate(
-      { scheduledAssessmentId, candidateId: candidate._id }, // Match both fields
+      { scheduledAssessmentId, candidateId }, // Match both fields
       { otp }, // Update the OTP field
       { new: true } // Return the updated document
     );
 
     // If no OTP document is found, create a new one
     if (!updatedOtp) {
-      console.log('No existing OTP document found. Creating a new one.');
+      console.log("No existing OTP document found. Creating a new one.");
       updatedOtp = await Otp.create({
         scheduledAssessmentId,
-        candidateId: candidate._id,
+        candidateId,
         otp,
-        expiresAt:new Date(Date.now()+90*1000)
+        expiresAt: new Date(Date.now() + 90 * 1000),
       });
     }
 
     // Generate the assessment link
-    const link = `http://localhost:3000/assessmenttest?assessmentId=${scheduledAssessmentId}&candidateId=${candidate._id}`;
+    const link = `http://localhost:3000/assessmenttest?assessmentId=${scheduledAssessmentId}&candidateId=${candidateId}`;
 
     // Email options
     const mailOptions = {
-      from: 'ashrafshaik250@gmail.com',
-      to: Email,
-      subject: 'Assessment Invitation',
-      text: `You have been invited to participate in an assessment. Use this link: ${link}. Your OTP is ${updatedOtp.otp}, valid for 90 seconds.`,
+      from: "ashrafshaik250@gmail.com",
+      to: candidate.Email,
+      subject: "Assessment Invitation",
+      // text: `You have been invited to participate in an assessment. Use this link: ${link}. Your OTP is ${updatedOtp.otp}, valid for 90 seconds.`,
+      text: `Your new  OTP is ${updatedOtp.otp}, valid for 90 seconds.`,
     };
 
     // Send the email
+    console.log("Resend OTP:",updatedOtp.otp)
     try {
       await transporter.sendMail(mailOptions);
-      console.log('Email sent successfully to:', Email);
-      return res.status(200).json({ message: 'Email re-sent successfully' });
+      console.log("Email sent successfully to:", candidate.Email);
+      return res.status(200).json({ message: "Email re-sent successfully" });
     } catch (emailError) {
-      console.error('Error sending email to:', Email, emailError);
-      return res.status(500).json({ message: 'Failed to send email', error: emailError.message });
+      console.error("Error sending email to:", candidate.Email, emailError);
+      return res
+        .status(500)
+        .json({ message: "Failed to send email", error: emailError.message });
     }
   } catch (error) {
-    console.error('Error processing resend-link request:', error);
-    return res.status(500).json({ message: 'Internal server error', error: error.message });
+    console.error("Error processing resend-link request:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 });
 
-
-
-app.post('/send-assessment-link', async (req, res) => {
+app.post("/send-assessment-link", async (req, res) => {
   const { scheduledAssessmentId, candidateEmails } = req.body;
   // const notes = "notes text";
 
   try {
-    const assessment = await scheduledAssessmentsSchema.findById(scheduledAssessmentId);
+    const assessment = await scheduledAssessmentsSchema.findById(
+      scheduledAssessmentId
+    );
     if (!assessment) {
-      console.error('Assessment not found for ID:', scheduledAssessmentId);
-      return res.status(404).json({ message: 'Assessment not found' });
+      console.error("Assessment not found for ID:", scheduledAssessmentId);
+      return res.status(404).json({ message: "Assessment not found" });
     }
 
-    const uniqueEmails = new Set([...candidateEmails, "shashankmende88@gmail.com"]);
-    // const uniqueEmails = new Set([...candidateEmails, "shashankmende88@gmail.com","shashankyadavmende79@gmail.com"]);
-    // const secretKey = 'test';
-    const secretKey = process.env.SECRET_KEY || 'test-secret';
-    
+    const secretKey = process.env.SECRET_KEY || "test-secret";
 
-
-    for (const email of uniqueEmails) {
-      
-      
-       const candidate = await Candidate.findOne({ Email: email });
-        if (!candidate) {
-          console.error('Candidate not found for email:', email);
-          
-        }
-    
-      const otp= generateOTP(candidate._id)
-      // const expiresAt = new Date(new Date()+90*1000)
-      const expiresAt = new Date(Date.now() + 90 * 1000);
-
-      await Otp.create({scheduledAssessmentId,candidateId:candidate._id,otp,expiresAt})
-      let encryptedAssessmentId, encryptedCandidateId;
-      try {
-        encryptedAssessmentId = encrypt(scheduledAssessmentId, secretKey);
-        encryptedCandidateId = encrypt(candidate._id, secretKey);
-      } catch (encryptionError) {
-        console.error('Encryption failed for email:', email, encryptionError);
-        continue;
+    for (const email of candidateEmails) {
+      const candidate = await Candidate.findOne({ Email: email });
+      if (!candidate) {
+        console.error("Candidate not found for email:", email);
       }
 
-      // const link = `http://localhost:3000/assessmenttest?assessmentId=${encryptedAssessmentId}&candidateId=${encryptedCandidateId}`;
-      const link = `http://localhost:3000/assessmenttest?assessmentId=${scheduledAssessmentId}&candidateId=${candidate._id}`;
+      const candidateAssessmentDetails = await CandidateAssessment.findOne({candidateId:candidate._id,scheduledAssessmentId})
+      console.log("candidateAssessmentDetails",candidateAssessmentDetails)
+
+      const otp = generateOTP(candidate._id);
+      const expiresAt = new Date(Date.now() + 90 * 1000);
+
+      await Otp.create({
+        scheduledAssessmentId, 
+        candidateId: candidate._id,
+        otp, 
+        expiresAt,
+      });
+
+      const encryptedId =  encrypt(candidateAssessmentDetails._id.toString(),'test')
+      // const link = `http://localhost:3000/assessmenttest?assessmentId=${scheduledAssessmentId}&candidateId=${candidate._id}&candidateAssessmentId=${candidateAssessmentDetails._id}`;
+      // const link = `http://localhost:3000/assessmenttest?candidateAssessmentId=${candidateAssessmentDetails._id}`;
+      const link = `http://localhost:3000/assessmenttest?candidateAssessmentId=${encryptedId}`;
+      const updateCandidateAssessments = await CandidateAssessment.findByIdAndUpdate(candidateAssessmentDetails._id,{assessmentLink:link},{new:true})
+console.log("updateCandidateAssessments ",updateCandidateAssessments)
       const mailOptions = {
-        from: 'ashrafshaik250@gmail.com',
+        from: "ashrafshaik250@gmail.com",
         to: email,
-        subject: 'Assessment Invitation',
+        subject: "Assessment Invitation",
         text: `You have been invited to participate in an assessment. Use this link: ${link}. Your OTP is ${otp}, valid for 90 seconds.`,
       };
-      
 
-      console.log('Sending email with options:', mailOptions);
+      console.log("Sending email with options:", mailOptions);
 
       try {
         await transporter.sendMail(mailOptions);
-        console.log('Email sent successfully to:', email);
+        console.log("Email sent successfully to:", email);
       } catch (emailError) {
-        console.error('Error sending email to:', email, emailError);
+        console.error("Error sending email to:", email, emailError);
       }
     }
 
-    res.status(200).json({ message: 'Emails sent successfully' });
+    res.status(200).json({ message: "Emails sent successfully" });
   } catch (error) {
-    console.error('Error sending email:', error);
-    res.status(500).json({ message: 'Error sending email', error: error.message });
+    console.error("Error sending email:", error);
+    res
+      .status(500)
+      .json({ message: "Error sending email", error: error.message });
   }
 });
 
 
-app.get('/assessment-details/:assessmentId', async (req, res) => {
+app.get("/assessment-details/:assessmentId", async (req, res) => {
   try {
     const { assessmentId } = req.params;
-    const assessment = await Assessment.findById(assessmentId).populate('Sections.Questions');
+    const assessment = await Assessment.findById(assessmentId).populate(
+      "Sections.Questions"
+    );
     if (!assessment) {
-      return res.status(404).json({ error: 'Assessment not found' });
+      return res.status(404).json({ error: "Assessment not found" });
     }
-    res.status(200).json(assessment); 
+    res.status(200).json(assessment);
   } catch (error) {
-    res.status(400).json({ error: error.message }); 
+    res.status(400).json({ error: error.message });
   }
 });
 
-app.get('/candidate/:candidateId', async (req, res) => {
+app.get("/candidate/:candidateId", async (req, res) => {
   const { candidateId } = req.params;
   try {
     const candidate = await Candidate.findById(candidateId);
     if (!candidate) {
-      return res.status(404).json({ message: 'Candidate not found' });
+      return res.status(404).json({ message: "Candidate not found" });
     }
     res.status(200).json(candidate);
   } catch (error) {
-    console.error('Error fetching candidate data:', error);
-    res.status(500).json({ error: 'Error fetching candidate data', message: error.message });
+    console.error("Error fetching candidate data:", error);
+    res
+      .status(500)
+      .json({ error: "Error fetching candidate data", message: error.message });
   }
 });
 
-
-app.get('/position/:positionId', async (req, res) => {
+app.get("/position/:positionId", async (req, res) => {
   const { positionId } = req.params;
   try {
     const position = await Position.findById(positionId);
     if (!position) {
-      return res.status(404).json({ message: 'Candidate not found' });
+      return res.status(404).json({ message: "Candidate not found" });
     }
     res.status(200).json(position);
   } catch (error) {
-    console.error('Error fetching position data:', error);
-    res.status(500).json({ error: 'Error fetching position data', message: error.message });
+    console.error("Error fetching position data:", error);
+    res
+      .status(500)
+      .json({ error: "Error fetching position data", message: error.message });
   }
 });
 
 
+//assessment test
+const AssessmentTest = require("./models/AssessmentTest.js")
+app.post('/assessmenttest', async (req, res) => {
+  const {
+    assessmentId,
+    answeredQuestionsScore,
+    totalScore,
+    passScore,
+    candidateId,
+    answeredQuestions,
+    totalQuestions,
+    timeSpent,
+    questions,
+    sections
+  } = req.body;
+
+  try {
+    const assessmentTest = new AssessmentTest({
+      assessmentId,
+      answeredQuestionsScore,
+      totalScore,
+      passScore,
+      candidateId,
+      answeredQuestions,
+      totalQuestions,
+      timeSpent,
+      questions,
+      sections
+    });
+    await assessmentTest.save();
+    res.status(201).json({ message: 'Assessment test result saved successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error saving assessment test result', message: error.message });
+  }
+});
 
 
 ConnectDb().then(() => {
