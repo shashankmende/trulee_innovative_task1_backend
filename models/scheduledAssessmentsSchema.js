@@ -12,8 +12,8 @@ const ScheduledAssessmentSchema = new mongoose.Schema({
     proctoringEnabled: { type: Boolean, default: false },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: true },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
-    //isActive
+    updatedAt: { type: Date, default: Date.now },
+    isActive:{type:Boolean,default:true}
 },{timestamps:true});
 
 

@@ -454,7 +454,7 @@ app.patch("/candidate-assessment/:id", async (req, res) => {
     // Find and update the document, or return 404 if not found
     const updateResult = await CandidateAssessment.findOneAndUpdate(
       { _id: id },
-      { status: "cancelled" },
+      req.body,
       { new: true } // This returns the updated document
     );
 
@@ -491,7 +491,7 @@ app.post("/fetch-content", (req, res) => {
     body: `This is the body content for section ${section}`,
   }));
   res.json(content);
-});
+}); 
 
 //get candidate assessment based on _id ,purpose: to get candidate id and assessment id out of it.
 app.get('/candidate-assessment/details/:id',async(req,res)=>{
@@ -501,7 +501,7 @@ app.get('/candidate-assessment/details/:id',async(req,res)=>{
       console.log("id is missing")
       return res.status(400).send({message:"id is missing"})
     }
-    const document = await CandidateAssessment.findById(id)
+    const document = await CandidateAssessment.findById(id) 
     console.log("document",document)
     if (!document){
       console.log("no document found")
@@ -693,12 +693,12 @@ console.log("req body",req.body)
     try {
       await transporter.sendMail(mailOptions);
       console.log("Email sent successfully to:", candidate.Email);
-      return res.status(200).json({ message: "Email re-sent successfully" });
+      return res.status(200).json({success:true, message: "Email re-sent successfully" });
     } catch (emailError) {
       console.error("Error sending email to:", candidate.Email, emailError);
       return res
         .status(500)
-        .json({ message: "Failed to send email", error: emailError.message });
+        .json({ success:false,message: "Failed to send email", error: emailError.message });
     }
   } catch (error) {
     console.error("Error processing resend-link request:", error);
