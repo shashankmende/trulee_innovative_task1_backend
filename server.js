@@ -522,6 +522,100 @@ app.get('/candidate-assessment/details/:id',async(req,res)=>{
   }
 })
 
+//save the answers,
+app.patch('/candidate-assessment/:candidateAssessmentId/sections/:sectionIndex/questions/:questionId', async (req, res) => {
+  try {
+      const { candidateAssessmentId, sectionIndex, questionId } = req.params;
+      const { SectionName, Answers,passScore,sectionResult,totalScore } = req.body;
+      const { answer, isCorrect, score, isAnswerLater } = Answers;
+
+      // Check if the document and specific question exist
+      let updatedAssessment = await CandidateAssessment.findOne({
+          _id: candidateAssessmentId,
+          [`sections.${sectionIndex}.Answers.questionId`]: questionId,
+      });
+
+      if (!updatedAssessment) {
+          console.log("No matching document found. Creating a new one...");
+
+          // Check if the CandidateAssessment exists
+
+          const candidateAssessment = await CandidateAssessment.findById(candidateAssessmentId);
+
+          if (!candidateAssessment) {
+              return res.status(404).json({ message: 'Candidate assessment not found' });
+          }
+
+          // Check if the section exists
+          const section = candidateAssessment.sections[sectionIndex];
+          if (!section) {
+              // Add a new section
+              candidateAssessment.sections.push({
+                  SectionName,
+                  Answers: [
+                      {
+                          questionId,
+                          answer,
+                          isCorrect,
+                          score, 
+                          isAnswerLater,
+                          submittedAt: new Date(),
+                      },
+                  ],
+                  totalScore,
+                  passScore,
+                  sectionResult
+              });
+          } else { 
+              // Add a new answer to the existing section 
+              section.Answers.push({
+                  questionId,
+                  answer,
+                  isCorrect,
+                  score,
+                  isAnswerLater,
+                  submittedAt: new Date(),
+              });
+
+              section.totalScore = totalScore
+              section.passScore = passScore,
+              section.sectionResult = sectionResult 
+          }
+
+          // Save the updated candidateAssessment document
+          updatedAssessment = await candidateAssessment.save();
+      } else {
+          // Update the existing answer in the document
+          updatedAssessment = await CandidateAssessment.findOneAndUpdate(
+              {
+                  _id: candidateAssessmentId,
+                  [`sections.${sectionIndex}.Answers.questionId`]: questionId,
+              },
+              {
+                  $set: {
+                      [`sections.${sectionIndex}.Answers.$.answer`]: answer,
+                      [`sections.${sectionIndex}.Answers.$.isCorrect`]: isCorrect,
+                      [`sections.${sectionIndex}.Answers.$.score`]: score,
+                      [`sections.${sectionIndex}.Answers.$.isAnswerLater`]: isAnswerLater,
+                      [`sections.${sectionIndex}.Answers.$.submittedAt`]: new Date(),
+                      [`sections.${sectionIndex}.totalScore`]:totalScore,
+                      [`sections.${sectionIndex}.passScore`]:passScore,
+                      [`sections.${sectionIndex}.sectionResult`]:sectionResult
+                  },
+              },
+              { new: true }
+          );
+      }
+
+      // Send the updated document back to the client
+      res.json(updatedAssessment);
+  } catch (error) {
+      console.error('Error updating assessment:', error);
+      res.status(500).json({ message: 'Internal Server Error', error });
+  }
+});
+
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -530,19 +624,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// const encrypt = (text, secretKey) => {
-//   return CryptoJS.AES.encrypt(text, secretKey).toString();
-// };
 
-// const generateOTP = () => {
-//   // Generate a unique secret (store it securely for each user)
-//   const secret = authenticator.generateSecret();
-
-//   // Generate the TOTP based on the secret
-//   const otp = authenticator.generate(secret);
-
-//   return { otp, secret }; // Return both OTP and secret
-// };
 const encrypt = (text, secretKey) => {
   const encrypted = CryptoJS.AES.encrypt(text, secretKey).toString();
   return encodeURIComponent(encrypted); // Make it URL-safe

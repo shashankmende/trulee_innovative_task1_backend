@@ -37,7 +37,8 @@ const sectionSchema = new mongoose.Schema({
     Answers: [AnswerSchema],
     totalScore: Number,
     passScore: Number,
-    sectionResult: { type: String, enum: ['pass', 'fail'], required: true },
+    sectionResult: { type: String, enum: ['pass', 'fail'] },
+    // sectionResult: { type: String, enum: ['pass', 'fail'], required: true },
 });
  
 
@@ -60,7 +61,8 @@ const CandidateAssessmentSchema = new mongoose.Schema({
     totalScore: { type: Number, default: 0 },
     rescheduledTo: { type: mongoose.Schema.Types.ObjectId, ref: 'CandidateAssessment' },
     createdAt: { type: Date, default: Date.now },
-    completionTime: { type: Date },
+    // completionTime: { type: Date },
+    completionTime: { type: String },
     sections: [sectionSchema],
  
 },{timestamps:true});
